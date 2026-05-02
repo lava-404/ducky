@@ -4,11 +4,12 @@ import { NextResponse } from 'next/server';
 import DodoPayments from 'dodopayments';
 import { prisma } from '@/lib/prisma';
 import { encrypt } from '@/lib/encryption';
+import crypto from 'crypto'; // Required for hashing
+
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    
     const { apiKey, projectName, yieldPercentage } = await request.json();
 
     // 1. Basic Validation
@@ -22,20 +23,16 @@ export async function POST(request: Request) {
     // 2. Initialize Dodo SDK for Validation
     const client = new DodoPayments({
       bearerToken: apiKey,
-      // Automatically toggle environment based on the key prefix
       environment: 'test_mode',
     });
 
     let businessName = "Verified Business";
 
-
     try {
       // 3. The SDK Handshake (Validation)
-      // Access the .items array from the response
       const brands = await client.brands.list();
       
       if (brands.items && brands.items.length > 0) {
-        // Grab the name from the first item in the list
         businessName = brands.items[0].name ?? "Verified Business"
       }
     } catch (sdkError: any) {
@@ -46,27 +43,45 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Encrypt API Key for Security
+    // 4. Create a stable hash of the API key to check for duplicates
+    // This will always produce the same string for the same key
+    const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
+
+    // 5. NEW LOGIC: Prevent Duplicate API Keys using the stable hash
+    const existingProject = await prisma.project.findUnique({
+      where: {
+        keyHash: keyHash,
+      },
+    });
+
+    if (existingProject) {
+      return NextResponse.json(
+        { error: 'This Dodo account is already linked to an existing project.' },
+        { status: 400 }
+      );
+    }
+
+    // 6. Encrypt API Key for Storage
+    // (Note: This output varies each time, which is why we don't use it for the lookup)
     const encryptedKey = encrypt(apiKey);
 
-    // 5. Save to DB via Prisma
-    // This creates the "Project" which ties the Dodo account to your yield engine
+    // 7. Save to DB via Prisma
     const project = await prisma.project.create({
       data: {
         projectName,
         encryptedApiKey: encryptedKey,
-        yieldPercentage: yieldPercentage || 20, // Defaults to 20% if not provided
+        keyHash: keyHash, // Storing the hash so we can find it next time
+        yieldPercentage: yieldPercentage || 20,
       },
     });
 
     console.log(`✅ Project created: ${project.id} for business: ${businessName}`);
 
-    // 6. Return success to the Dashboard
+    // 8. Return success to the Dashboard
     return NextResponse.json({
       success: true,
       businessName: businessName,
       projectId: project.id,
-      // You can now use this projectId in your frontend to navigate to the next step
     });
 
   } catch (error) {
@@ -80,6 +95,5 @@ export async function POST(request: Request) {
 
 export async function GET() {
   console.log("DB URL:", process.env.DATABASE_URL);
-
   return new Response("Check your terminal");
 }

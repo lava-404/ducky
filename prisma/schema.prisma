@@ -7,10 +7,28 @@ datasource db {
 }
 
 model Project {
-  id               String   @id @default(cuid())
-  projectName      String
-  encryptedApiKey  String
-  vaultAddress     String?
-  yieldPercentage  Int
-  createdAt        DateTime @default(now())
+  id              String   @id @default(cuid())
+  projectName     String
+  encryptedApiKey String
+  keyHash         String   @unique // <--- The @unique attribute is mandatory for findUnique
+  yieldPercentage Int
+  createdAt       DateTime @default(now())
+  vaultAddress    String?
+
+  products        Product[]
+}
+
+model Product {
+  id              String   @id @default(cuid()) // your internal ID (IMPORTANT)
+  projectId       String
+  name            String
+  dodoProductId   String   // external ID from Dodo
+  createdAt       DateTime @default(now())
+  slug            String    
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  
 }

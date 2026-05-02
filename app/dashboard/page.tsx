@@ -1,6 +1,8 @@
 'use client';
 
+import CreateProductModal from "@/components/CreateProductModal";
 import ProtectedPageProvider from "@/providers/ProtectedPageProvider";
+import { YieldButton } from "@/sdk/button";
 
 import { usePrivy } from '@privy-io/react-auth';
 
@@ -20,6 +22,9 @@ function NewProjectButton() {
     apiKey: "",
     yieldPercentage: 20,
   });
+
+
+
 
   const handleConfirm = async () => {
     if (!form.projectName.trim() || !form.apiKey.trim()) return;
@@ -48,6 +53,8 @@ function NewProjectButton() {
   return (
     <>
       {/* Trigger */}
+      <CreateProductModal projectId="cmoo6beoa00009oxkk8do5gwu" />
+      <YieldButton productId="">Create checkout url Button</YieldButton>
       <button
         onClick={() => setOpen(true)}
         className="group relative overflow-hidden border border-white px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:text-black"

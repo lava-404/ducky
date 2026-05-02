@@ -1,8 +1,25 @@
+import { YieldProvider } from "@/sdk/provider";
 
 import type { Metadata } from "next";
 import PrivyProviderWrapper from "../providers/PrivyProviderWrapper";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
+ 
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+});
+ 
 
 
 const geistSans = Geist({
@@ -33,7 +50,12 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <PrivyProviderWrapper
         >
+          <YieldProvider config={{
+            projectId: "123",
+            apiBaseUrl: "https://localhost:3000",
+          }}>
           {children}
+        </YieldProvider>
         </PrivyProviderWrapper>
         </body>
     </html>
