@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id               String   @id @default(cuid())
+  projectName      String
+  encryptedApiKey  String
+  vaultAddress     String?
+  yieldPercentage  Int
+  createdAt        DateTime @default(now())
+}

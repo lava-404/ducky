@@ -9,13 +9,24 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.7.0",
+    "@privy-io/react-auth": "^3.21.0",
+    "@solana-program/memo": "^0.11.0",
+    "crypto-js": "^4.2.0",
+    "dodopayments": "^2.28.2",
     "next": "16.2.3",
+    "pg": "^8.20.0",
+    "prisma": "^7.7.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "solana": "link:@privy-io/react-auth/solana"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
